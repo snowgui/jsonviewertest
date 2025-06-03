@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Viewer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #2e2e2e;
+            color: #f8f9fa;
+        }
+        .json-key {
+            font-weight: bold;
+            color: #17a2b8;
+        }
+        .json-primitive {
+            font-style: italic;
+        }
+        .json-string {
+            color: #28a745;
+        }
+        .json-number {
+            color: #fd7e14;
+        }
+        .json-boolean {
+            color: #dc3545;
+        }
+        .json-null {
+            color: #6c757d;
+        }
+        .json-toggle {
+            cursor: pointer;
+            color: #007bff;
+        }
+        .json-toggle:before {
+            content: '';
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .json-expanded .json-toggle:before {
+            content: '';
+        }
+        .json-content {
+            display: none;
+            padding-left: 20px;
+        }
+        .json-expanded .json-content {
+            display: block;
+        }
+        .json-viewer {
+            white-space: pre-wrap;
+        }
+        .card {
+            background-color: #3c3c3c;
+        }
+        .form-control, .btn {
+            background-color: #4e4e4e;
+            color: #f8f9fa;
+            border: 1px solid #6c757d;
+        }
+        .copy-button {
+            margin-left: 10px;
+            cursor: pointer;
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">JSON Viewer</h1>
+        <div class="form-group">
+            <label for="json-input">Paste your JSON here:</label>
+            <textarea class="form-control" id="json-input" rows="10"></textarea>
+        </div>
+        <button id="parse-json" class="btn btn-primary mb-4">Parse JSON</button>
+        <div id="json-viewer" class="card p-3"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script>
+        function createJsonViewer(json) {
+            const container = document.createElement('div');
+            container.appendChild(createJsonElement(json));
+            return container;
+        }
+
+        function createJsonElement(value) {
+            if (Array.isArray(value)) {
+                return createJsonArrayElement(value);
+            } else if (typeof value === 'object' && value !== null) {
+                return createJsonObjectElement(value);
+            } else {
+                return createJsonPrimitiveElement(value);
+            }
+        }
+
+        function createJsonArrayElement(array) {
+            const container = document.createElement('div');
+            container.classList.add('json-array', 'mb-2');
+
+            const toggle = document.createElement('span');
+            toggle.classList.add('json-toggle');
+            toggle.innerHTML = `<i class="fas fa-plus"></i> Array[${array.length}]`;
+            container.appendChild(toggle);
+
+            const content = document.createElement('div');
+            content.classList.add('json-content');
+            array.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('ml-3');
+                itemElement.appendChild(createJsonElement(item));
+                content.appendChild(itemElement);
+            });
+
+            container.appendChild(content);
+            addToggleBehavior(toggle, content);
+            return container;
+        }
+
+        function createJsonObjectElement(object) {
+            const container = document.createElement('div');
+            container.classList.add('json-object', 'mb-2');
+
+            const toggle = document.createElement('span');
+            toggle.classList.add('json-toggle');
+            toggle.innerHTML = `<i class="fas fa-plus"></i> Object`;
+            container.appendChild(toggle);
+
+            const content = document.createElement('div');
+            content.classList.add('json-content');
+            Object.keys(object).forEach(key => {
+                const keyElement = document.createElement('div');
+                keyElement.classList.add('ml-3', 'd-flex', 'align-items-center');
+                keyElement.innerHTML = `<span class="json-key">${key}</span>: `;
+                const valueElement = createJsonElement(object[key]);
+                keyElement.appendChild(valueElement);
+                keyElement.appendChild(createCopyButton(valueElement));
+                content.appendChild(keyElement);
+            });
+
+            container.appendChild(content);
+            addToggleBehavior(toggle, content);
+            return container;
+        }
+
+        function createJsonPrimitiveElement(value) {
+            const container = document.createElement('span');
+            container.classList.add('json-primitive');
+
+            if (typeof value === 'string') {
+                container.classList.add('json-string');
+            } else if (typeof value === 'number') {
+                container.classList.add('json-number');
+            } else if (typeof value === 'boolean') {
+                container.classList.add('json-boolean');
+            } else if (value === null) {
+                container.classList.add('json-null');
+            }
+
+            container.innerText = JSON.stringify(value);
+            return container;
+        }
+
+        function createCopyButton(valueElement) {
+            const button = document.createElement('span');
+            button.classList.add('copy-button', 'fas', 'fa-copy');
+            button.addEventListener('click', () => {
+                copyToClipboard(valueElement.innerText);
+            });
+            return button;
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Copied to clipboard');
+        }
+
+        function addToggleBehavior(toggle, content) {
+            toggle.addEventListener('click', () => {
+                const isExpanded = content.style.display === 'block';
+                content.style.display = isExpanded ? 'none' : 'block';
+                const icon = toggle.querySelector('i');
+                icon.classList.toggle('fa-plus', isExpanded);
+                icon.classList.toggle('fa-minus', !isExpanded);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('parse-json').addEventListener('click', () => {
+                const jsonInput = document.getElementById('json-input').value;
+                try {
+                    const json = JSON.parse(jsonInput);
+                    const viewer = createJsonViewer(json);
+                    const viewerContainer = document.getElementById('json-viewer');
+                    viewerContainer.innerHTML = '';
+                    viewerContainer.appendChild(viewer);
+                } catch (e) {
+                    alert('Invalid JSON');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
