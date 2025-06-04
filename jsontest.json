@@ -1,0 +1,188 @@
+{
+    "propostas_credito_imobiliario": [
+      {
+        "id_proposta": "PROP-001-2025-ABCD",
+        "data_solicitacao": "2025-06-03T10:00:00Z",
+        "status_proposta": "Em Análise",
+        "valor_imovel": 850000.00,
+        "valor_financiado": 680000.00,
+        "prazo_meses": 360,
+        "sistema_amortizacao": "SAC",
+        "tipo_taxa": "Prefixada",
+        "taxa_juros_anual": 9.50,
+        "custo_efetivo_total_anual": 10.25,
+        "segmento_cliente": "Pessoa Física - Alta Renda",
+        "objetivo_credito": "Aquisição de Imóvel Residencial Novo",
+        "participantes": [
+          {
+            "tipo_participante": "Proponente Principal",
+            "nome_completo": "João Silva Pereira",
+            "cpf": "123.456.789-00",
+            "data_nascimento": "1980-05-15",
+            "renda_mensal_bruta": 25000.00,
+            "estado_civil": "Casado(a)",
+            "nacionalidade": "Brasileira",
+            "profissao": "Engenheiro de Software Sênior"
+          },
+          {
+            "tipo_participante": "Cônjuge/Co-proponente",
+            "nome_completo": "Maria Santos Souza",
+            "cpf": "987.654.321-00",
+            "data_nascimento": "1982-11-20",
+            "renda_mensal_bruta": 18000.00,
+            "estado_civil": "Casado(a)",
+            "nacionalidade": "Brasileira",
+            "profissao": "Médica Anestesista"
+          }
+        ],
+        "dados_imovel": {
+          "endereco": "Rua das Flores, 123, Apto 101",
+          "bairro": "Jardins",
+          "cidade": "São Paulo",
+          "estado": "SP",
+          "cep": "01234-567",
+          "tipo_imovel": "Apartamento",
+          "area_construida_m2": 150.00,
+          "numero_dormitorios": 3,
+          "possui_garagem": true
+        },
+        "garantias_adicionais": [
+          "Não aplicável"
+        ],
+        "documentos_enviados": [
+          {"nome": "RG Proponente", "status": "Conferido"},
+          {"nome": "CPF Proponente", "status": "Conferido"},
+          {"nome": "Comprovante de Residência", "status": "Conferido"},
+          {"nome": "Certidão de Casamento", "status": "Conferido"},
+          {"nome": "Holerites Proponente", "status": "Aguardando Análise"},
+          {"nome": "Extratos Bancários", "status": "Aguardando Análise"},
+          {"nome": "Matrícula do Imóvel", "status": "Aguardando Análise"}
+        ],
+        "historico_analise": [
+          {"data": "2025-06-03T10:05:00Z", "evento": "Proposta recebida pelo sistema"},
+          {"data": "2025-06-03T11:30:00Z", "evento": "Análise preliminar de crédito iniciada"}
+        ],
+        "observacoes_internas": "Cliente com bom histórico de crédito e renda compatível. Necessária análise detalhada dos holerites e extratos bancários.",
+        "politicas_aceitas": {
+          "termos_condicoes_gerais": true,
+          "politica_privacidade": true,
+          "declaracao_veracidade": true
+        }
+      },
+      {
+        "id_proposta": "PROP-002-2025-EFGH",
+        "data_solicitacao": "2025-06-02T15:30:00Z",
+        "status_proposta": "Aprovado com Restrições",
+        "valor_imovel": 400000.00,
+        "valor_financiado": 320000.00,
+        "prazo_meses": 240,
+        "sistema_amortizacao": "Price",
+        "tipo_taxa": "Pós-fixada",
+        "indexador_taxa": "IPCA",
+        "spread_anual": 4.00,
+        "taxa_juros_anual": 12.00,
+        "custo_efetivo_total_anual": 13.50,
+        "segmento_cliente": "Pessoa Física - Média Renda",
+        "objetivo_credito": "Aquisição de Imóvel Residencial Usado",
+        "participantes": [
+          {
+            "tipo_participante": "Proponente Principal",
+            "nome_completo": "Ana Costa Lima",
+            "cpf": "111.222.333-44",
+            "data_nascimento": "1990-03-25",
+            "renda_mensal_bruta": 8000.00,
+            "estado_civil": "Solteiro(a)",
+            "nacionalidade": "Brasileira",
+            "profissao": "Analista de Marketing"
+          }
+        ],
+        "dados_imovel": {
+          "endereco": "Avenida Principal, 456, Casa",
+          "bairro": "Centro",
+          "cidade": "Belo Horizonte",
+          "estado": "MG",
+          "cep": "30123-456",
+          "tipo_imovel": "Casa",
+          "area_construida_m2": 100.00,
+          "numero_dormitorios": 2,
+          "possui_garagem": true
+        },
+        "garantias_adicionais": [
+          "Fiador: Carlos Oliveira (CPF: 555.666.777-88)"
+        ],
+        "documentos_enviados": [
+          {"nome": "RG Proponente", "status": "Conferido"},
+          {"nome": "CPF Proponente", "status": "Conferido"},
+          {"nome": "Comprovante de Residência", "status": "Conferido"},
+          {"nome": "Holerites Proponente", "status": "Conferido"},
+          {"nome": "Declaração de Imposto de Renda", "status": "Conferido"}
+        ],
+        "historico_analise": [
+          {"data": "2025-06-02T16:00:00Z", "evento": "Proposta recebida pelo sistema"},
+          {"data": "2025-06-03T09:00:00Z", "evento": "Análise de crédito concluída. Pendência de documentação do fiador."}
+        ],
+        "observacoes_internas": "Aprovação condicionada à apresentação da documentação completa do fiador e avaliação do imóvel.",
+        "politicas_aceitas": {
+          "termos_condicoes_gerais": true,
+          "politica_privacidade": true,
+          "declaracao_veracidade": true
+        }
+      },
+      {
+        "id_proposta": "PROP-003-2025-IJKL",
+        "data_solicitacao": "2025-06-01T09:15:00Z",
+        "status_proposta": "Rejeitada",
+        "motivo_rejeicao": "Inconsistência de Renda",
+        "valor_imovel": 200000.00,
+        "valor_financiado": 160000.00,
+        "prazo_meses": 180,
+        "sistema_amortizacao": "SAC",
+        "tipo_taxa": "Prefixada",
+        "taxa_juros_anual": 15.00,
+        "custo_efetivo_total_anual": 16.50,
+        "segmento_cliente": "Pessoa Física - Baixa Renda",
+        "objetivo_credito": "Reforma/Construção",
+        "participantes": [
+          {
+            "tipo_participante": "Proponente Principal",
+            "nome_completo": "Roberto Gomes Neves",
+            "cpf": "777.888.999-00",
+            "data_nascimento": "1975-08-01",
+            "renda_mensal_bruta": 3500.00,
+            "estado_civil": "Divorciado(a)",
+            "nacionalidade": "Brasileira",
+            "profissao": "Autônomo"
+          }
+        ],
+        "dados_imovel": {
+          "endereco": "Rua da Paz, 789",
+          "bairro": "Vila Nova",
+          "cidade": "Rio de Janeiro",
+          "estado": "RJ",
+          "cep": "20000-000",
+          "tipo_imovel": "Casa",
+          "area_construida_m2": 80.00,
+          "numero_dormitorios": 2,
+          "possui_garagem": false
+        },
+        "garantias_adicionais": [
+          "Não aplicável"
+        ],
+        "documentos_enviados": [
+          {"nome": "RG Proponente", "status": "Conferido"},
+          {"nome": "CPF Proponente", "status": "Conferido"},
+          {"nome": "Extratos Bancários (últimos 6 meses)", "status": "Com Inconsistências"}
+        ],
+        "historico_analise": [
+          {"data": "2025-06-01T09:30:00Z", "evento": "Proposta recebida pelo sistema"},
+          {"data": "2025-06-02T14:00:00Z", "evento": "Análise de crédito concluída. Renda insuficiente/inconsistente."}
+        ],
+        "observacoes_internas": "Inconsistência entre a renda declarada e os extratos bancários. Risco elevado para aprovação do crédito.",
+        "politicas_aceitas": {
+          "termos_condicoes_gerais": true,
+          "politica_privacidade": true,
+          "declaracao_veracidade": true
+        }
+      }
+    ]
+  }

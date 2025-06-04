@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Viewer with Multiple Search Results</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #2e2e2e;
+            color: #f8f9fa;
+        }
+        .json-key {
+            font-weight: bold;
+            color: #17a2b8;
+        }
+        .json-primitive {
+            font-style: italic;
+        }
+        .json-string {
+            color: #28a745;
+        }
+        .json-number {
+            color: #fd7e14;
+        }
+        .json-boolean {
+            color: #dc3545;
+        }
+        .json-null {
+            color: #6c757d;
+        }
+        .json-toggle {
+            cursor: pointer;
+            color: #007bff;
+        }
+        .json-toggle:before {
+            content: '';
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .json-expanded .json-toggle:before {
+            content: '';
+        }
+        .json-content {
+            display: none;
+            padding-left: 20px;
+        }
+        .json-expanded .json-content {
+            display: block;
+        }
+        .json-viewer {
+            white-space: pre-wrap;
+        }
+        .card {
+            background-color: #3c3c3c;
+        }
+        .form-control, .btn {
+            background-color: #4e4e4e;
+            color: #f8f9fa;
+            border: 1px solid #6c757d;
+        }
+        .copy-button {
+            margin-left: 10px;
+            cursor: pointer;
+            color: #ffc107;
+        }
+        /* Style for highlighted search results */
+        .highlight {
+            background-color: #ffd700; /* Gold color for highlighting */
+            color: #333; /* Darker text for contrast */
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        #search-results-container {
+            background-color: #4e4e4e;
+            border: 1px solid #6c757d;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            display: none; /* Hidden by default */
+            max-height: 200px; /* Limit height */
+            overflow-y: auto; /* Scroll if too many results */
+        }
+        .search-result-item {
+            margin-bottom: 5px;
+            border-bottom: 1px solid #5a5a5a;
+            padding-bottom: 5px;
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .search-result-item strong {
+            color: #17a2b8;
+        }
+        .search-result-item span {
+            color: #28a745;
+            white-space: pre-wrap; /* Preserve formatting for complex values */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">JSON Viewer</h1>
+        <div class="form-group">
+            <label for="json-input">Paste your JSON here:</label>
+            <textarea class="form-control" id="json-input" rows="10"></textarea>
+        </div>
+        <button id="parse-json" class="btn btn-primary mb-4">Parse JSON</button>
+
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="search-input" placeholder="Search any parameter...">
+            <div class="input-group-append">
+                <button class="btn btn-info" type="button" id="search-button"><i class="fas fa-search"></i> Search</button>
+                <button class="btn btn-secondary" type="button" id="clear-search-button"><i class="fas fa-times"></i> Clear</button>
+            </div>
+        </div>
+
+        <div id="search-results-container" class="mb-4">
+            <h5>Found Results:</h5>
+            <div id="search-results-list">
+                </div>
+        </div>
+
+        <div id="json-viewer" class="card p-3"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script>
+        let parsedJsonData = null; // Store the parsed JSON globally
+        let allFoundResults = []; // Store all found key-value pairs
+
+        function createJsonViewer(json, searchTerm = '') {
+            allFoundResults = []; // Reset on new render
+            const container = document.createElement('div');
+            container.appendChild(createJsonElement(json, searchTerm));
+            return container;
+        }
+
+        function createJsonElement(value, searchTerm = '') {
+            if (Array.isArray(value)) {
+                return createJsonArrayElement(value, searchTerm);
+            } else if (typeof value === 'object' && value !== null) {
+                return createJsonObjectElement(value, searchTerm);
+            } else {
+                return createJsonPrimitiveElement(value, searchTerm);
+            }
+        }
+
+        function createJsonArrayElement(array, searchTerm) {
+            const container = document.createElement('div');
+            container.classList.add('json-array', 'mb-2');
+
+            const toggle = document.createElement('span');
+            toggle.classList.add('json-toggle');
+            toggle.innerHTML = `<i class="fas fa-plus"></i> Array[${array.length}]`;
+            container.appendChild(toggle);
+
+            const content = document.createElement('div');
+            content.classList.add('json-content');
+            let anyChildMatches = false;
+
+            array.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('ml-3');
+                const childElement = createJsonElement(item, searchTerm);
+                itemElement.appendChild(childElement);
+                content.appendChild(itemElement);
+
+                if (childElement.innerHTML.includes('<span class="highlight">')) {
+                    anyChildMatches = true;
+                }
+            });
+
+            container.appendChild(content);
+            addToggleBehavior(toggle, content, anyChildMatches);
+            return container;
+        }
+
+        function createJsonObjectElement(object, searchTerm) {
+            const container = document.createElement('div');
+            container.classList.add('json-object', 'mb-2');
+
+            const toggle = document.createElement('span');
+            toggle.classList.add('json-toggle');
+            toggle.innerHTML = `<i class="fas fa-plus"></i> Object`;
+            container.appendChild(toggle);
+
+            const content = document.createElement('div');
+            content.classList.add('json-content');
+            let anyChildMatches = false;
+
+            Object.keys(object).forEach(key => {
+                const keyElement = document.createElement('div');
+                keyElement.classList.add('ml-3', 'd-flex', 'align-items-center');
+
+                let keyHtml = `<span class="json-key">${key}</span>: `;
+                const originalValue = object[key];
+                const stringValue = JSON.stringify(originalValue);
+
+                // Check if the key itself matches the search term
+                if (searchTerm && key.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    keyHtml = `<span class="json-key highlight">${key}</span>: `;
+                    anyChildMatches = true;
+                    // Store this occurrence
+                    allFoundResults.push({ key: key, value: originalValue });
+                }
+                
+                keyElement.innerHTML = keyHtml;
+
+                const valueElement = createJsonElement(originalValue, searchTerm);
+                keyElement.appendChild(valueElement);
+                keyElement.appendChild(createCopyButton(valueElement));
+                content.appendChild(keyElement);
+
+                // Check if the value or any child of the value matches the search term
+                if (valueElement.innerHTML.includes('<span class="highlight">') || keyHtml.includes('<span class="highlight">')) {
+                    anyChildMatches = true;
+                    // If the value itself is a primitive and matches, store it (avoiding duplicates if key already matched)
+                    if (typeof originalValue !== 'object' && searchTerm && stringValue.toLowerCase().includes(searchTerm.toLowerCase())) {
+                         // Check if this specific key-value pair is already added (to avoid duplicates from recursive calls if a parent key matched)
+                        const isAlreadyAdded = allFoundResults.some(result => 
+                            result.key === key && JSON.stringify(result.value) === JSON.stringify(originalValue)
+                        );
+                        if (!isAlreadyAdded) {
+                             allFoundResults.push({ key: key, value: originalValue });
+                        }
+                    }
+                }
+            });
+
+            container.appendChild(content);
+            addToggleBehavior(toggle, content, anyChildMatches);
+            return container;
+        }
+
+        function createJsonPrimitiveElement(value, searchTerm) {
+            const container = document.createElement('span');
+            container.classList.add('json-primitive');
+
+            const stringValue = (value === null || value === undefined) ? 'null' : value.toString();
+            let displayText = JSON.stringify(value); // Default to JSON.stringify for proper display
+            let isMatch = false;
+
+            if (typeof value === 'string') {
+                container.classList.add('json-string');
+                if (searchTerm && stringValue.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    const regex = new RegExp(searchTerm, 'gi');
+                    displayText = JSON.stringify(value).replace(regex, (match) => `<span class="highlight">${match}</span>`);
+                    isMatch = true;
+                }
+            } else if (typeof value === 'number') {
+                container.classList.add('json-number');
+                if (searchTerm && stringValue.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    const regex = new RegExp(searchTerm, 'gi');
+                    displayText = stringValue.replace(regex, (match) => `<span class="highlight">${match}</span>`);
+                    isMatch = true;
+                }
+            } else if (typeof value === 'boolean') {
+                container.classList.add('json-boolean');
+                if (searchTerm && stringValue.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    const regex = new RegExp(searchTerm, 'gi');
+                    displayText = stringValue.replace(regex, (match) => `<span class="highlight">${match}</span>`);
+                    isMatch = true;
+                }
+            } else if (value === null) {
+                container.classList.add('json-null');
+                if (searchTerm && 'null'.includes(searchTerm.toLowerCase())) {
+                    displayText = `<span class="highlight">null</span>`;
+                    isMatch = true;
+                }
+            }
+
+            container.innerHTML = displayText;
+            return container;
+        }
+
+        function createCopyButton(valueElement) {
+            const button = document.createElement('span');
+            button.classList.add('copy-button', 'fas', 'fa-copy');
+            button.addEventListener('click', () => {
+                // Remove highlight spans before copying
+                const textToCopy = valueElement.cloneNode(true);
+                textToCopy.querySelectorAll('.highlight').forEach(span => {
+                    span.replaceWith(span.textContent);
+                });
+                copyToClipboard(textToCopy.innerText.trim());
+            });
+            return button;
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Copied to clipboard!');
+        }
+
+        function addToggleBehavior(toggle, content, shouldExpand = false) {
+            toggle.addEventListener('click', () => {
+                const isExpanded = content.style.display === 'block';
+                content.style.display = isExpanded ? 'none' : 'block';
+                const icon = toggle.querySelector('i');
+                icon.classList.toggle('fa-plus', isExpanded);
+                icon.classList.toggle('fa-minus', !isExpanded);
+            });
+
+            if (shouldExpand) {
+                content.style.display = 'block';
+                const icon = toggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-plus');
+                    icon.classList.add('fa-minus');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const jsonInput = document.getElementById('json-input');
+            const parseJsonBtn = document.getElementById('parse-json');
+            const jsonViewerContainer = document.getElementById('json-viewer');
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+            const clearSearchButton = document.getElementById('clear-search-button');
+            const searchResultsContainer = document.getElementById('search-results-container');
+            const searchResultsList = document.getElementById('search-results-list');
+
+            // Function to update the results display
+            function updateResultsDisplay() {
+                searchResultsList.innerHTML = ''; // Clear previous results
+                if (allFoundResults.length > 0) {
+                    allFoundResults.forEach(result => {
+                        const resultItem = document.createElement('div');
+                        resultItem.classList.add('search-result-item');
+                        resultItem.innerHTML = `
+                            <strong>Key:</strong> <span>${result.key}</span><br>
+                            <strong>Value:</strong> <span>${JSON.stringify(result.value, null, 2)}</span>
+                        `;
+                        searchResultsList.appendChild(resultItem);
+                    });
+                    searchResultsContainer.style.display = 'block';
+                } else {
+                    searchResultsContainer.style.display = 'none';
+                }
+            }
+
+            parseJsonBtn.addEventListener('click', () => {
+                try {
+                    parsedJsonData = JSON.parse(jsonInput.value); // Store the parsed JSON
+                    const viewer = createJsonViewer(parsedJsonData);
+                    jsonViewerContainer.innerHTML = '';
+                    jsonViewerContainer.appendChild(viewer);
+                    searchInput.value = ''; // Clear search input on new parse
+                    updateResultsDisplay(); // Clear previous search results
+                } catch (e) {
+                    alert('Invalid JSON: ' + e.message);
+                    parsedJsonData = null; // Clear stored data on error
+                    updateResultsDisplay(); // Clear previous search results
+                }
+            });
+
+            searchButton.addEventListener('click', () => {
+                const searchTerm = searchInput.value.trim();
+                if (parsedJsonData) {
+                    const viewer = createJsonViewer(parsedJsonData, searchTerm); // Re-render with search
+                    jsonViewerContainer.innerHTML = '';
+                    jsonViewerContainer.appendChild(viewer);
+                    
+                    updateResultsDisplay(); // Update display with all found results
+
+                    if (allFoundResults.length === 0) {
+                        alert('No matching parameter found.');
+                    }
+                } else {
+                    alert('Please parse a JSON first.');
+                }
+            });
+
+            clearSearchButton.addEventListener('click', () => {
+                searchInput.value = '';
+                if (parsedJsonData) {
+                    const viewer = createJsonViewer(parsedJsonData); // Re-render without search term
+                    jsonViewerContainer.innerHTML = '';
+                    jsonViewerContainer.appendChild(viewer);
+                    allFoundResults = []; // Clear the stored results
+                    updateResultsDisplay(); // Clear the results display
+                }
+            });
+
+            // Allow pressing Enter in the search input to trigger search
+            searchInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent default form submission if any
+                    searchButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
